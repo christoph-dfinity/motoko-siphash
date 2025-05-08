@@ -47,73 +47,84 @@ module {
     };
 
     public func write_nat16(bytes : Nat16) {
-      let x = Nat64.fromNat32(Nat32.fromNat16(bytes));
-      let size : Nat64 = 2;
-      length += Nat64.toNat(size);
-
-      let needed : Nat64 = 8 - ntail;
-      tail |= x << (8 * ntail);
-      if (size < needed) {
-        ntail += 1;
-        return
-      };
-
-      v3 ^= tail;
-      compress();
-      v0 ^= tail;
-
-      ntail := 0;
-      tail := 0;
-      ntail := size - needed;
-      tail := if (needed < 8) { x >> (8 * needed) } else { 0 };
+      let (msb, lsb) = Nat16.explode(bytes);
+      write_nat8(lsb);
+      write_nat8(msb);
     };
 
     public func write_nat32(bytes : Nat32) {
-      let x = Nat64.fromNat32(bytes);
-      let size : Nat64 = 4;
-      length += Nat64.toNat(size);
-
-      let needed : Nat64 = 8 - ntail;
-      tail |= x << (8 * ntail);
-      if (size < needed) {
-        ntail += 1;
-        return
-      };
-
-      v3 ^= tail;
-      compress();
-      v0 ^= tail;
-
-      ntail := 0;
-      tail := 0;
-      ntail := size - needed;
-      tail := if (needed < 8) { x >> (8 * needed) } else { 0 };
+      let (b4, b3, b2, b1) = Nat32.explode(bytes);
+      write_nat8(b1);
+      write_nat8(b2);
+      write_nat8(b3);
+      write_nat8(b4);
     };
 
     public func write_nat64(bytes : Nat64) {
-      let x = bytes;
-      let size : Nat64 = 8;
-      length += Nat64.toNat(size);
-
-      let needed : Nat64 = 8 - ntail;
-      tail := tail | (x << (8 * ntail));
-      if (size < needed) {
-        ntail += 1;
-        return
-      };
-      v3 ^= tail;
-      compress();
-      v0 ^= tail;
-
-      ntail := size - needed;
-      tail := if (needed < 8) { x >> (8 * needed) } else { 0 };
+      let (b8, b7, b6, b5, b4, b3, b2, b1) = Nat64.explode(bytes);
+      write_nat8(b1);
+      write_nat8(b2);
+      write_nat8(b3);
+      write_nat8(b4);
+      write_nat8(b5);
+      write_nat8(b6);
+      write_nat8(b7);
+      write_nat8(b8);
     };
 
     public func write_bytes(bytes: [Nat8]) {
-      // TODO: Optimize
-      for (byte in bytes.values()) {
-        write_nat8(byte);
-      }
+      let size_nat = bytes.size();
+      length += size_nat;
+      var ix = 0;
+
+      if (ntail != 0) {
+        let needed = 8 - ntail;
+        // We can't complete a block, so just append to tail
+        while (Nat64.fromNat(ix) < needed) {
+          let x = Nat64.fromNat32(Nat32.fromNat16(Nat16.fromNat8(bytes[ix])));
+          tail |= x << (8 * ntail);
+          ntail += 1;
+          ix += 1;
+        };
+        if (Nat64.fromNat(length) < needed) {
+          ntail += Nat64.fromNat(length);
+          return
+        } else {
+          v3 ^= tail;
+          compress();
+          v0 ^= tail;
+          ntail := 0;
+          tail := 0;
+        };
+      };
+
+      // Write as many full blocks as we can
+      while ((size_nat - ix) : Nat >= 8) {
+        let block : Nat64
+          = (Nat64.fromNat32(Nat32.fromNat16(Nat16.fromNat8(bytes[ix    ]))) <<  0)
+          | (Nat64.fromNat32(Nat32.fromNat16(Nat16.fromNat8(bytes[ix + 1]))) <<  8)
+          | (Nat64.fromNat32(Nat32.fromNat16(Nat16.fromNat8(bytes[ix + 2]))) << 16)
+          | (Nat64.fromNat32(Nat32.fromNat16(Nat16.fromNat8(bytes[ix + 3]))) << 24)
+          | (Nat64.fromNat32(Nat32.fromNat16(Nat16.fromNat8(bytes[ix + 4]))) << 32)
+          | (Nat64.fromNat32(Nat32.fromNat16(Nat16.fromNat8(bytes[ix + 5]))) << 40)
+          | (Nat64.fromNat32(Nat32.fromNat16(Nat16.fromNat8(bytes[ix + 6]))) << 48)
+          | (Nat64.fromNat32(Nat32.fromNat16(Nat16.fromNat8(bytes[ix + 7]))) << 56);
+
+        v3 ^= block;
+        compress();
+        v0 ^= block;
+
+        ix += 8;
+      };
+
+      // We know the remaining bytes aren't enough to fill a full block,
+      // so append them to tail
+      while (ix < size_nat) {
+        let x = Nat64.fromNat32(Nat32.fromNat16(Nat16.fromNat8(bytes[ix])));
+        ix += 1;
+        tail |= x << (8 * ntail);
+        ntail += 1;
+      };
     };
 
     public func write_blob(blob: Blob) {

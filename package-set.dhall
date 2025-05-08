@@ -9,6 +9,11 @@ let
       , repo = "https://github.com/dfinity/new-motoko-base"
       , dependencies = [] : List Text
       }
+    , { name = "base"
+      , version = "93c3b938c3fcc3f4b0456f1e78a8512103c5efd7"
+      , repo = "https://github.com/dfinity/motoko-base"
+      , dependencies = [] : List Text
+      }
     ] : List Package
 
 in  upstream # additions

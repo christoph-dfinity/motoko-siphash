@@ -13,9 +13,7 @@ fn test_cases(hasher: impl Hasher + Clone) {
     println!("{out}");
 
     let mut hasher3 = hasher.clone();
-    for byte in "Motoko is beautiful".bytes() {
-        hasher3.write_u8(byte);
-    }
+    hasher3.write("Motoko is beautiful".as_bytes());
     let out = hasher3.finish();
     println!("{out}");
 }

@@ -12,19 +12,17 @@ func tup3(x : Nat64, y : Nat64, z : Nat64): T.TestableItem<(Nat64, Nat64, Nat64)
   { tup3T with item = (x, y, z)  };
 
 func test_cases(hasher: Sip.SipHasher13): (Nat64, Nat64, Nat64) {
-    hasher.reset();
-    let out1 = hasher.finish();
+  hasher.reset();
+  let out1 = hasher.finish();
 
-    hasher.reset();
-    hasher.write_nat64(out1);
-    let out2 = hasher.finish();
+  hasher.reset();
+  hasher.write_nat64(out1);
+  let out2 = hasher.finish();
 
-    hasher.reset();
-    for (byte in ("Motoko is beautiful" : Blob).values()) {
-      hasher.write_nat8(byte);
-    };
-    let out3 = hasher.finish();
-    (out1, out2, out3)
+  hasher.reset();
+  hasher.write_blob("Motoko is beautiful" : Blob);
+  let out3 = hasher.finish();
+  (out1, out2, out3)
 };
 
 let suite = S.suite("sip13", [
