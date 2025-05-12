@@ -1,33 +1,41 @@
+import Nat "mo:base/Nat";
 import Nat8 "mo:base/Nat8";
 import Nat16 "mo:base/Nat16";
 import Nat32 "mo:base/Nat32";
 import Nat64 "mo:base/Nat64";
+import Int "mo:base/Int";
+import Int8 "mo:base/Int8";
+import Int16 "mo:base/Int16";
+import Int32 "mo:base/Int32";
+import Int64 "mo:base/Int64";
 import Blob "mo:base/Blob";
+import Text "mo:base/Text";
 
 module {
   public class SipHasher13(k0 : Nat64, k1 : Nat64) {
-    var length : Nat = 0;
     var v0 : Nat64 = 0x736f6d6570736575 ^ k0;
     var v1 : Nat64 = 0x646f72616e646f6d ^ k1;
     var v2 : Nat64 = 0x6c7967656e657261 ^ k0;
     var v3 : Nat64 = 0x7465646279746573 ^ k1;
 
+    // Total written bytes
+    var length : Nat = 0;
     // Unprocessed bytes
     var tail : Nat64 = 0;
     // How many bytes in tail are valid
     var ntail : Nat64 = 0;
 
     public func reset() {
-      length := 0;
       v0 := 0x736f6d6570736575 ^ k0;
       v1 := 0x646f72616e646f6d ^ k1;
       v2 := 0x6c7967656e657261 ^ k0;
       v3 := 0x7465646279746573 ^ k1;
+      length := 0;
       tail := 0;
       ntail := 0;
     };
 
-    public func write_nat8(byte : Nat8) {
+    public func writeNat8(byte : Nat8) {
       let x = Nat64.fromNat32(Nat32.fromNat16(Nat16.fromNat8(byte)));
       length += 1;
 
@@ -46,33 +54,44 @@ module {
       tail := 0;
     };
 
-    public func write_nat16(bytes : Nat16) {
+    public func writeNat16(bytes : Nat16) {
       let (msb, lsb) = Nat16.explode(bytes);
-      write_nat8(lsb);
-      write_nat8(msb);
+      writeNat8(lsb);
+      writeNat8(msb);
     };
 
-    public func write_nat32(bytes : Nat32) {
+    public func writeNat32(bytes : Nat32) {
       let (b4, b3, b2, b1) = Nat32.explode(bytes);
-      write_nat8(b1);
-      write_nat8(b2);
-      write_nat8(b3);
-      write_nat8(b4);
+      writeNat8(b1);
+      writeNat8(b2);
+      writeNat8(b3);
+      writeNat8(b4);
     };
 
-    public func write_nat64(bytes : Nat64) {
+    public func writeNat64(bytes : Nat64) {
       let (b8, b7, b6, b5, b4, b3, b2, b1) = Nat64.explode(bytes);
-      write_nat8(b1);
-      write_nat8(b2);
-      write_nat8(b3);
-      write_nat8(b4);
-      write_nat8(b5);
-      write_nat8(b6);
-      write_nat8(b7);
-      write_nat8(b8);
+      writeNat8(b1);
+      writeNat8(b2);
+      writeNat8(b3);
+      writeNat8(b4);
+      writeNat8(b5);
+      writeNat8(b6);
+      writeNat8(b7);
+      writeNat8(b8);
     };
 
-    public func write_bytes(bytes: [Nat8]) {
+    public func writeNat(nat : Nat) {
+      var n = nat;
+      writeNat8(Nat8.fromNat(n % 256));
+      n := Nat.bitshiftRight(n, 8);
+
+      while (n != 0) {
+        writeNat8(Nat8.fromNat(n % 256));
+        n := Nat.bitshiftRight(n, 8);
+      };
+    };
+
+    public func writeBytes(bytes: [Nat8]) {
       let size_nat = bytes.size();
       length += size_nat;
       var ix = 0;
@@ -127,11 +146,17 @@ module {
       };
     };
 
-    public func write_blob(blob: Blob) {
+    public func writeBlob(blob: Blob) {
       // TODO: Optimize
-      write_bytes(Blob.toArray(blob))
+      writeBytes(Blob.toArray(blob))
     };
 
+    public func writeText(text: Text) {
+      // TODO: Optimize
+      writeBlob(Text.encodeUtf8(text))
+    };
+
+    // TODO: Inline
     public func finish() : Nat64 {
         let b : Nat64 = ((Nat64.fromNat(length) & 0xff) << 56) | tail;
 
@@ -147,12 +172,21 @@ module {
         v0 ^ v1 ^ v2 ^ v3
     };
 
+    // TODO: Inline
     func compress() {
       v0 +%= v1; v1 <<>= 13; v1 ^= v0; v0 <<>= 32;
       v2 +%= v3; v3 <<>= 16; v3 ^= v2;
       v0 +%= v3; v3 <<>= 21; v3 ^= v0;
       v2 +%= v1; v1 <<>= 17; v1 ^= v2; v2 <<>= 32;
-    }
-  };
+    };
 
+    // TODO: Move these out of the class?
+    public func writeInt(x : Int) =
+      // TODO: VERY BAD! Find a reasonable encoding
+      writeNat(Int.abs(x));
+    public func writeInt8(x : Int8) = writeNat8(Int8.toNat8(x));
+    public func writeInt16(x : Int16) = writeNat16(Int16.toNat16(x));
+    public func writeInt32(x : Int32) = writeNat32(Int32.toNat32(x));
+    public func writeInt64(x : Int64) = writeNat64(Int64.toNat64(x));
+  };
 }
