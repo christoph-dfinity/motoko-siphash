@@ -34,7 +34,7 @@ module {{"#
       hasher.writeNat64(current);
       let next = hasher.finish();
       if (next != vec[i]) {{
-        Debug.print("Failed at " # Nat.toText(i) # ": " # Nat64.toText(next) # " != " # Nat64.toText(vec[i + 1]));
+        Debug.print("Failed at " # Nat.toText(i) # ": " # Nat64.toText(next) # " != " # Nat64.toText(vec[i]));
         assert false;
       }};
       current := next;
@@ -85,9 +85,9 @@ module {{"#
 }
 
 fn main() {
-    let mut nat64_test = fs::File::create("../test/Nat64.test.mo").unwrap();
+    let mut nat64_test = fs::File::create("../test/Nat64.mo").unwrap();
     mk_u64_test_vector(&mut nat64_test, 2389294459135787592, 17865012505422766641,9256366987270737912, 10_000);
 
-    let mut text_test = fs::File::create("../test/Text.test.mo").unwrap();
+    let mut text_test = fs::File::create("../test/Text.mo").unwrap();
     mk_text_test_vector(&mut text_test, 9640917070887187917, 15189360200716670480, 10_000);
 }

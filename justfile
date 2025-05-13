@@ -1,9 +1,9 @@
 default: test
 
 test:
-    rm -rf Test.wasm
-    $(vessel bin)/moc $(vessel sources) test/Test.mo -wasi-system-api
-    wasmtime Test.wasm
+    rm -rf Test.test.wasm
+    $(vessel bin)/moc $(vessel sources) test/Test.test.mo -wasi-system-api
+    wasmtime Test.test.wasm
 
 test-gen:
     cd dev/ && cargo run

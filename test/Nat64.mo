@@ -10018,7 +10018,7 @@ module {
       hasher.writeNat64(current);
       let next = hasher.finish();
       if (next != vec[i]) {
-        Debug.print("Failed at " # Nat.toText(i) # ": " # Nat64.toText(next) # " != " # Nat64.toText(vec[i + 1]));
+        Debug.print("Failed at " # Nat.toText(i) # ": " # Nat64.toText(next) # " != " # Nat64.toText(vec[i]));
         assert false;
       };
       current := next;
