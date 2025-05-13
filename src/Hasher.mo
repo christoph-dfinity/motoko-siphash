@@ -4,7 +4,7 @@ import Nat8 "mo:base/Nat8";
 import Nat16 "mo:base/Nat16";
 import Nat32 "mo:base/Nat32";
 import Nat64 "mo:base/Nat64";
-// import Int "mo:base/Int";
+import Int "mo:base/Int";
 import Int8 "mo:base/Int8";
 import Int16 "mo:base/Int16";
 import Int32 "mo:base/Int32";
@@ -31,6 +31,15 @@ module {
       h.writeNat8(Nat8.fromNat(n % 256));
       n := Nat.bitshiftRight(n, 8);
     };
+  };
+
+  public func int(h : Hasher, int : Int) {
+    // Maps all positive integers to 2, 4, 6, ... and all negative ones to 1, 3, 5, ...
+    var x : Nat = Int.abs(int);
+    if (int < 0) {
+      x -= 1;
+    };
+    nat(h, x);
   };
 
   public func int8(h : Hasher, x : Int8) = h.writeNat8(Int8.toNat8(x));
