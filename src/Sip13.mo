@@ -10,18 +10,9 @@ import Int32 "mo:base/Int32";
 import Int64 "mo:base/Int64";
 import Blob "mo:base/Blob";
 import Text "mo:base/Text";
+import Hasher "Hasher";
 
 module {
-  type Hasher = {
-    writeNat8 : Nat8 -> ();
-    writeNat16 : Nat16 -> ();
-    writeNat32 : Nat32 -> ();
-    writeNat64 : Nat64 -> ();
-    writeBytes : [Nat8] -> ();
-    writeBytesVar : [var Nat8] -> ();
-    finish : () -> Nat64;
-  };
-
   public class SipHasher13(k0 : Nat64, k1 : Nat64) {
     var v0 : Nat64 = 0x736f6d6570736575 ^ k0;
     var v1 : Nat64 = 0x646f72616e646f6d ^ k1;
@@ -88,17 +79,6 @@ module {
       writeNat8(b6);
       writeNat8(b7);
       writeNat8(b8);
-    };
-
-    public func writeNat(nat : Nat) {
-      var n = nat;
-      writeNat8(Nat8.fromNat(n % 256));
-      n := Nat.bitshiftRight(n, 8);
-
-      while (n != 0) {
-        writeNat8(Nat8.fromNat(n % 256));
-        n := Nat.bitshiftRight(n, 8);
-      };
     };
 
     public func writeBytes(bytes: [Nat8]) {
@@ -246,24 +226,15 @@ module {
       v0 +%= v3; v3 <<>= 21; v3 ^= v0;
       v2 +%= v1; v1 <<>= 17; v1 ^= v2; v2 <<>= 32;
     };
-
-    // TODO: Move these out of the class?
-    public func writeInt(x : Int) =
-      // TODO: VERY BAD! Find a reasonable encoding
-      writeNat(Int.abs(x));
-    public func writeInt8(x : Int8) = writeNat8(Int8.toNat8(x));
-    public func writeInt16(x : Int16) = writeNat16(Int16.toNat16(x));
-    public func writeInt32(x : Int32) = writeNat32(Int32.toNat32(x));
-    public func writeInt64(x : Int64) = writeNat64(Int64.toNat64(x));
   };
 
-  public func withHasher(k1 : Nat64, k2 : Nat64, f : Hasher -> ()) : Nat64 {
+  public func withHasher(k1 : Nat64, k2 : Nat64, f : Hasher.Hasher -> ()) : Nat64 {
     let hasher = SipHasher13(k1, k2);
     f(hasher);
     hasher.finish();
   };
 
-  public func withHasherUnkeyed(f : Hasher -> ()) : Nat64 {
+  public func withHasherUnkeyed(f : Hasher.Hasher -> ()) : Nat64 {
     let hasher = SipHasher13(0, 0);
     f(hasher);
     hasher.finish();

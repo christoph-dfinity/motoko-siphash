@@ -7,7 +7,7 @@ fn mk_u64_test_vector(mut w: impl Write, k1 : u64, k2 : u64, seed : u64, rounds 
     writeln!(w, r#"import Nat "mo:base/Nat";
 import Nat64 "mo:base/Nat64";
 import Debug "mo:base/Debug";
-import Sip "../src/Sip";
+import Sip "../src/Sip13";
 
 module {{"#
     ).unwrap();
@@ -48,7 +48,7 @@ fn mk_text_test_vector(mut w: impl Write, k1 : u64, k2 : u64, rounds : u32) {
     writeln!(w, r#"import Nat "mo:base/Nat";
 import Nat64 "mo:base/Nat64";
 import Debug "mo:base/Debug";
-import Sip "../src/Sip";
+import Sip "../src/Sip13";
 
 module {{"#
     ).unwrap();

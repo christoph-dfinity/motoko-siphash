@@ -1,7 +1,7 @@
 import Nat "mo:base/Nat";
 import Nat64 "mo:base/Nat64";
 import Debug "mo:base/Debug";
-import Sip "../src/Sip";
+import Sip "../src/Sip13";
 
 module {
   let k1 : Nat64 = 0x21287AA6CC990248;

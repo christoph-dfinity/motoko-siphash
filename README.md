@@ -5,7 +5,8 @@ A Motoko implementation of [SipHash](https://en.wikipedia.org/wiki/SipHash)
 ## Example
 
 ```motoko
-import { withHasherUnkeyed } "mo:siphash/Sip";
+import { withHasherUnkeyed } "mo:siphash/Sip13";
+import H "mo:siphash/Hasher";
 
 type Vec2 = {
   x : Nat;
@@ -14,8 +15,8 @@ type Vec2 = {
 
 func hashVec2(vec : Vec2) : Nat64 {
   withHasherUnkeyed(func (h) {
-    h.writeNat(vec.x);
-    h.writeNat(vec.y);
+    H.nat(h, vec.x);
+    H.nat(h, vec.y);
   })
 };
 ```
