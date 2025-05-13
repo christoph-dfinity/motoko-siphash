@@ -12,6 +12,16 @@ import Blob "mo:base/Blob";
 import Text "mo:base/Text";
 
 module {
+  type Hasher = {
+    writeNat8 : Nat8 -> ();
+    writeNat16 : Nat16 -> ();
+    writeNat32 : Nat32 -> ();
+    writeNat64 : Nat64 -> ();
+    writeBytes : [Nat8] -> ();
+    writeBytesVar : [var Nat8] -> ();
+    finish : () -> Nat64;
+  };
+
   public class SipHasher13(k0 : Nat64, k1 : Nat64) {
     var v0 : Nat64 = 0x736f6d6570736575 ^ k0;
     var v1 : Nat64 = 0x646f72616e646f6d ^ k1;
@@ -146,6 +156,63 @@ module {
       };
     };
 
+    // Verbatim copy of writeBytes
+    public func writeBytesVar(bytes: [var Nat8]) {
+      let size_nat = bytes.size();
+      length += size_nat;
+      var ix = 0;
+
+      if (ntail != 0) {
+        let needed = 8 - ntail;
+        // We can't complete a block, so just append to tail
+        while (Nat64.fromNat(ix) < needed) {
+          let x = Nat64.fromNat32(Nat32.fromNat16(Nat16.fromNat8(bytes[ix])));
+          tail |= x << (8 * ntail);
+          ntail += 1;
+          ix += 1;
+        };
+        if (Nat64.fromNat(length) < needed) {
+          ntail += Nat64.fromNat(length);
+          return
+        } else {
+          v3 ^= tail;
+          compress();
+          v0 ^= tail;
+          ntail := 0;
+          tail := 0;
+        };
+      };
+
+      // Write as many full blocks as we can
+      while ((size_nat - ix) : Nat >= 8) {
+        let block : Nat64
+          = (Nat64.fromNat32(Nat32.fromNat16(Nat16.fromNat8(bytes[ix    ]))) <<  0)
+          | (Nat64.fromNat32(Nat32.fromNat16(Nat16.fromNat8(bytes[ix + 1]))) <<  8)
+          | (Nat64.fromNat32(Nat32.fromNat16(Nat16.fromNat8(bytes[ix + 2]))) << 16)
+          | (Nat64.fromNat32(Nat32.fromNat16(Nat16.fromNat8(bytes[ix + 3]))) << 24)
+          | (Nat64.fromNat32(Nat32.fromNat16(Nat16.fromNat8(bytes[ix + 4]))) << 32)
+          | (Nat64.fromNat32(Nat32.fromNat16(Nat16.fromNat8(bytes[ix + 5]))) << 40)
+          | (Nat64.fromNat32(Nat32.fromNat16(Nat16.fromNat8(bytes[ix + 6]))) << 48)
+          | (Nat64.fromNat32(Nat32.fromNat16(Nat16.fromNat8(bytes[ix + 7]))) << 56);
+
+        v3 ^= block;
+        compress();
+        v0 ^= block;
+
+        ix += 8;
+      };
+
+      // We know the remaining bytes aren't enough to fill a full block,
+      // so append them to tail
+      while (ix < size_nat) {
+        let x = Nat64.fromNat32(Nat32.fromNat16(Nat16.fromNat8(bytes[ix])));
+        ix += 1;
+        tail |= x << (8 * ntail);
+        ntail += 1;
+      };
+    };
+
+
     public func writeBlob(blob: Blob) {
       // TODO: Optimize
       writeBytes(Blob.toArray(blob))
@@ -188,5 +255,17 @@ module {
     public func writeInt16(x : Int16) = writeNat16(Int16.toNat16(x));
     public func writeInt32(x : Int32) = writeNat32(Int32.toNat32(x));
     public func writeInt64(x : Int64) = writeNat64(Int64.toNat64(x));
+  };
+
+  public func withHasher(k1 : Nat64, k2 : Nat64, f : Hasher -> ()) : Nat64 {
+    let hasher = SipHasher13(k1, k2);
+    f(hasher);
+    hasher.finish();
+  };
+
+  public func withHasherUnkeyed(f : Hasher -> ()) : Nat64 {
+    let hasher = SipHasher13(0, 0);
+    f(hasher);
+    hasher.finish();
   };
 }
