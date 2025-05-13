@@ -198,7 +198,6 @@ module {
       writeBlob(Text.encodeUtf8(text))
     };
 
-    // TODO: Inline
     public func finish() : Nat64 {
         let b : Nat64 = ((Nat64.fromNat(length) & 0xff) << 56) | tail;
 
@@ -214,7 +213,6 @@ module {
         v0 ^ v1 ^ v2 ^ v3
     };
 
-    // TODO: Inline
     func compress() {
       v0 +%= v1; v1 <<>= 13; v1 ^= v0; v0 <<>= 32;
       v2 +%= v3; v3 <<>= 16; v3 ^= v2;
