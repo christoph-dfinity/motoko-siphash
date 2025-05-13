@@ -1,0 +1,17 @@
+[dependencies]
+base = "0.14.10"
+
+[dev-dependencies]
+new-base = "0.4.0"
+bench = "1.0.0"
+
+[package]
+name = "siphash"
+version = "1.0.0"
+description = "SipHash implementation"
+repository = "https://github.com/christoph-dfinity/motoko-siphash"
+keywords = [ "hash" ]
+license = "Apache-2.0"
+
+[toolchain]
+moc = "0.14.10"

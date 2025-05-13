@@ -4,13 +4,13 @@ let Package =
 
 let
   additions =
-    [ { name = "core"
+    [ { name = "new-base"
       , version = "1c362a913315580938dc4462bf87148b06a6095d"
       , repo = "https://github.com/dfinity/new-motoko-base"
       , dependencies = [] : List Text
       }
     , { name = "base"
-      , version = "93c3b938c3fcc3f4b0456f1e78a8512103c5efd7"
+      , version = "moc-0.14.10"
       , repo = "https://github.com/dfinity/motoko-base"
       , dependencies = [] : List Text
       }
