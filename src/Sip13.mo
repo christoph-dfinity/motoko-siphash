@@ -156,13 +156,13 @@ module {
 
         v0_ ^= block;
 
-        v0 := v0_;
-        v1 := v1_;
-        v2 := v2_;
-        v3 := v3_;
-
         ix += 8;
       };
+
+      v0 := v0_;
+      v1 := v1_;
+      v2 := v2_;
+      v3 := v3_;
 
       // We know the remaining bytes aren't enough to fill a full block,
       // so append them to tail
@@ -232,13 +232,13 @@ module {
 
         v0_ ^= block;
 
-        v0 := v0_;
-        v1 := v1_;
-        v2 := v2_;
-        v3 := v3_;
-
         ix += 8;
-    };
+      };
+      v0 := v0_;
+      v1 := v1_;
+      v2 := v2_;
+      v3 := v3_;
+
 
       // We know the remaining bytes aren't enough to fill a full block,
       // so append them to tail
