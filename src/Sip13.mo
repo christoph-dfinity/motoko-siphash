@@ -82,10 +82,26 @@ module {
 
     public func writeNat64(bytes : Nat64) {
       if (ntail == 0) {
-        v3 ^= bytes;
-        compress();
-        v0 ^= bytes;
         length += 8;
+
+        var v0_ = v0;
+        var v1_ = v1;
+        var v2_ = v2;
+        var v3_ = v3;
+
+        v3_ ^= bytes;
+
+        v0_ +%= v1_; v1_ <<>= 13; v1_ ^= v0_; v0_ <<>= 32;
+        v2_ +%= v3_; v3_ <<>= 16; v3_ ^= v2_;
+        v0_ +%= v3_; v3_ <<>= 21; v3_ ^= v0_;
+        v2_ +%= v1_; v1_ <<>= 17; v1_ ^= v2_; v2_ <<>= 32;
+
+        v0_ ^= bytes;
+
+        v0 := v0_;
+        v1 := v1_;
+        v2 := v2_;
+        v3 := v3_;
       } else {
         let (b8, b7, b6, b5, b4, b3, b2, b1) = Nat64.explode(bytes);
         writeNat8(b1);
