@@ -18,7 +18,6 @@ module {
     writeNat32 : Nat32 -> ();
     writeNat64 : Nat64 -> ();
     writeBytes : [Nat8] -> ();
-    writeBytesVar : [var Nat8] -> ();
     finish : () -> Nat64;
   };
 
