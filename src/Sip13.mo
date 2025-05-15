@@ -81,6 +81,7 @@ module {
     };
 
     public func writeNat64(bytes : Nat64) {
+      // Optimization: Writing a block aligned Nat64 means we can immediately compress
       if (ntail == 0) {
         length += 8;
 
@@ -308,20 +309,21 @@ module {
         v0_ ^ v1_ ^ v2_ ^ v3_
     };
 
-    func compress() {
-      var v0_ = v0;
-      var v1_ = v1;
-      var v2_ = v2;
-      var v3_ = v3;
-      v0_ +%= v1_; v1_ <<>= 13; v1_ ^= v0_; v0_ <<>= 32;
-      v2_ +%= v3_; v3_ <<>= 16; v3_ ^= v2_;
-      v0_ +%= v3_; v3_ <<>= 21; v3_ ^= v0_;
-      v2_ +%= v1_; v1_ <<>= 17; v1_ ^= v2_; v2_ <<>= 32;
-      v0 := v0_;
-      v1 := v1_;
-      v2 := v2_;
-      v3 := v3_;
-    };
+    // Inlined everywhere
+    // func compress() {
+    //   var v0_ = v0;
+    //   var v1_ = v1;
+    //   var v2_ = v2;
+    //   var v3_ = v3;
+    //   v0_ +%= v1_; v1_ <<>= 13; v1_ ^= v0_; v0_ <<>= 32;
+    //   v2_ +%= v3_; v3_ <<>= 16; v3_ ^= v2_;
+    //   v0_ +%= v3_; v3_ <<>= 21; v3_ ^= v0_;
+    //   v2_ +%= v1_; v1_ <<>= 17; v1_ ^= v2_; v2_ <<>= 32;
+    //   v0 := v0_;
+    //   v1 := v1_;
+    //   v2 := v2_;
+    //   v3 := v3_;
+    // };
   };
 
   public func withHasher(k1 : Nat64, k2 : Nat64, f : Hasher.Hasher -> ()) : Nat64 {
