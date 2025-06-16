@@ -18,6 +18,8 @@ module {
     writeNat32 : Nat32 -> ();
     writeNat64 : Nat64 -> ();
     writeBytes : [Nat8] -> ();
+    writeBlob : Blob -> ();
+    reset : () -> ();
     finish : () -> Nat64;
   };
 
