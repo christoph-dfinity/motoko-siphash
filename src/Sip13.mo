@@ -32,7 +32,7 @@ module {
     };
 
     public func writeNat8(byte : Nat8) {
-      let x = Nat64.fromNat32(Nat32.fromNat16(Nat16.fromNat8(byte)));
+      let x = Nat64.fromNat(Nat8.toNat(byte));
       length += 1;
 
       let needed : Nat64 = 8 - ntail;
@@ -130,7 +130,7 @@ module {
         let needed = 8 - ntail;
         // We can't complete a block, so just append to tail
         while (Nat64.fromNat(ix) < needed) {
-          let x = Nat64.fromNat32(Nat32.fromNat16(Nat16.fromNat8(bytes[ix])));
+          let x = Nat64.fromNat(Nat8.toNat(bytes[ix]));
           tail |= x << (8 * ntail);
           ntail += 1;
           ix += 1;
@@ -155,14 +155,14 @@ module {
       // Write as many full blocks as we can
       while ((size_nat - ix) : Nat >= 8) {
         let block : Nat64
-          = (Nat64.fromNat32(Nat32.fromNat16(Nat16.fromNat8(bytes[ix    ]))) <<  0)
-          | (Nat64.fromNat32(Nat32.fromNat16(Nat16.fromNat8(bytes[ix + 1]))) <<  8)
-          | (Nat64.fromNat32(Nat32.fromNat16(Nat16.fromNat8(bytes[ix + 2]))) << 16)
-          | (Nat64.fromNat32(Nat32.fromNat16(Nat16.fromNat8(bytes[ix + 3]))) << 24)
-          | (Nat64.fromNat32(Nat32.fromNat16(Nat16.fromNat8(bytes[ix + 4]))) << 32)
-          | (Nat64.fromNat32(Nat32.fromNat16(Nat16.fromNat8(bytes[ix + 5]))) << 40)
-          | (Nat64.fromNat32(Nat32.fromNat16(Nat16.fromNat8(bytes[ix + 6]))) << 48)
-          | (Nat64.fromNat32(Nat32.fromNat16(Nat16.fromNat8(bytes[ix + 7]))) << 56);
+          = (Nat64.fromNat(Nat8.toNat(bytes[ix    ])) <<  0)
+          | (Nat64.fromNat(Nat8.toNat(bytes[ix + 1])) <<  8)
+          | (Nat64.fromNat(Nat8.toNat(bytes[ix + 2])) << 16)
+          | (Nat64.fromNat(Nat8.toNat(bytes[ix + 3])) << 24)
+          | (Nat64.fromNat(Nat8.toNat(bytes[ix + 4])) << 32)
+          | (Nat64.fromNat(Nat8.toNat(bytes[ix + 5])) << 40)
+          | (Nat64.fromNat(Nat8.toNat(bytes[ix + 6])) << 48)
+          | (Nat64.fromNat(Nat8.toNat(bytes[ix + 7])) << 56);
 
         v3_ ^= block;
 
@@ -175,16 +175,16 @@ module {
 
         ix += 8;
       };
-
       v0 := v0_;
       v1 := v1_;
       v2 := v2_;
       v3 := v3_;
 
+
       // We know the remaining bytes aren't enough to fill a full block,
       // so append them to tail
       while (ix < size_nat) {
-        let x = Nat64.fromNat32(Nat32.fromNat16(Nat16.fromNat8(bytes[ix])));
+        let x = Nat64.fromNat(Nat8.toNat(bytes[ix]));
         ix += 1;
         tail |= x << (8 * ntail);
         ntail += 1;
@@ -206,7 +206,7 @@ module {
         let needed = 8 - ntail;
         // We can't complete a block, so just append to tail
         while (Nat64.fromNat(ix) < needed) {
-          let x = Nat64.fromNat32(Nat32.fromNat16(Nat16.fromNat8(bytes[ix])));
+          let x = Nat64.fromNat(Nat8.toNat(bytes[ix]));
           tail |= x << (8 * ntail);
           ntail += 1;
           ix += 1;
@@ -231,14 +231,14 @@ module {
       // Write as many full blocks as we can
       while ((size_nat - ix) : Nat >= 8) {
         let block : Nat64
-          = (Nat64.fromNat32(Nat32.fromNat16(Nat16.fromNat8(bytes[ix    ]))) <<  0)
-          | (Nat64.fromNat32(Nat32.fromNat16(Nat16.fromNat8(bytes[ix + 1]))) <<  8)
-          | (Nat64.fromNat32(Nat32.fromNat16(Nat16.fromNat8(bytes[ix + 2]))) << 16)
-          | (Nat64.fromNat32(Nat32.fromNat16(Nat16.fromNat8(bytes[ix + 3]))) << 24)
-          | (Nat64.fromNat32(Nat32.fromNat16(Nat16.fromNat8(bytes[ix + 4]))) << 32)
-          | (Nat64.fromNat32(Nat32.fromNat16(Nat16.fromNat8(bytes[ix + 5]))) << 40)
-          | (Nat64.fromNat32(Nat32.fromNat16(Nat16.fromNat8(bytes[ix + 6]))) << 48)
-          | (Nat64.fromNat32(Nat32.fromNat16(Nat16.fromNat8(bytes[ix + 7]))) << 56);
+          = (Nat64.fromNat(Nat8.toNat(bytes[ix    ])) <<  0)
+          | (Nat64.fromNat(Nat8.toNat(bytes[ix + 1])) <<  8)
+          | (Nat64.fromNat(Nat8.toNat(bytes[ix + 2])) << 16)
+          | (Nat64.fromNat(Nat8.toNat(bytes[ix + 3])) << 24)
+          | (Nat64.fromNat(Nat8.toNat(bytes[ix + 4])) << 32)
+          | (Nat64.fromNat(Nat8.toNat(bytes[ix + 5])) << 40)
+          | (Nat64.fromNat(Nat8.toNat(bytes[ix + 6])) << 48)
+          | (Nat64.fromNat(Nat8.toNat(bytes[ix + 7])) << 56);
 
         v3_ ^= block;
 
@@ -260,7 +260,7 @@ module {
       // We know the remaining bytes aren't enough to fill a full block,
       // so append them to tail
       while (ix < size_nat) {
-        let x = Nat64.fromNat32(Nat32.fromNat16(Nat16.fromNat8(bytes[ix])));
+        let x = Nat64.fromNat(Nat8.toNat(bytes[ix]));
         ix += 1;
         tail |= x << (8 * ntail);
         ntail += 1;
