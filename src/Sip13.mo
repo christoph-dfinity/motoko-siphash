@@ -1,3 +1,4 @@
+import Int "mo:base/Int";
 import Nat "mo:base/Nat";
 import Nat8 "mo:base/Nat8";
 import Nat16 "mo:base/Nat16";
@@ -8,6 +9,17 @@ import Text "mo:base/Text";
 import Hasher "Hasher";
 
 module {
+  // Might be a way to reduce allocations
+  //
+  // public type State = [var Nat64];
+  // let V0 = 0;
+  // let V1 = 1;
+  // let V2 = 2;
+  // let V3 = 3;
+  // let LENGTH = 4;
+  // let TAIL = 5;
+  // let NTAIL = 6;
+
   public class SipHasher13(k0 : Nat64, k1 : Nat64) {
     var v0 : Nat64 = 0x736f6d6570736575 ^ k0;
     var v1 : Nat64 = 0x646f72616e646f6d ^ k1;
@@ -337,4 +349,152 @@ module {
     f(hasher);
     hasher.finish();
   };
+
+  public func hashBlob(seed : (Nat64, Nat64), bytes : Blob) : Nat64 {
+    var v0 : Nat64 = 0x736f6d6570736575 ^ seed.0;
+    var v1 : Nat64 = 0x646f72616e646f6d ^ seed.1;
+    var v2 : Nat64 = 0x6c7967656e657261 ^ seed.0;
+    var v3 : Nat64 = 0x7465646279746573 ^ seed.1;
+    let length : Nat = bytes.size();
+    var tail : Nat64 = 0;
+
+    var ix : Nat = 0;
+
+    // Write as many full blocks as we can
+    while ((length - ix) : Nat >= 8) {
+      let block : Nat64
+        = (Nat64.fromNat(Nat8.toNat(bytes[ix    ])) <<  0)
+        | (Nat64.fromNat(Nat8.toNat(bytes[ix + 1])) <<  8)
+        | (Nat64.fromNat(Nat8.toNat(bytes[ix + 2])) << 16)
+        | (Nat64.fromNat(Nat8.toNat(bytes[ix + 3])) << 24)
+        | (Nat64.fromNat(Nat8.toNat(bytes[ix + 4])) << 32)
+        | (Nat64.fromNat(Nat8.toNat(bytes[ix + 5])) << 40)
+        | (Nat64.fromNat(Nat8.toNat(bytes[ix + 6])) << 48)
+        | (Nat64.fromNat(Nat8.toNat(bytes[ix + 7])) << 56);
+
+      v3 ^= block;
+
+      v0 +%= v1; v1 <<>= 13; v1 ^= v0; v0 <<>= 32;
+      v2 +%= v3; v3 <<>= 16; v3 ^= v2;
+      v0 +%= v3; v3 <<>= 21; v3 ^= v0;
+      v2 +%= v1; v1 <<>= 17; v1 ^= v2; v2 <<>= 32;
+
+      v0 ^= block;
+
+      ix += 8;
+    };
+
+    // We know the remaining bytes aren't enough to fill a full block,
+    // so append them to tail
+    var ntail : Nat64 = 0;
+    while (ix < length) {
+      let x = Nat64.fromNat(Nat8.toNat(bytes[ix]));
+      ix += 1;
+      tail |= x << (8 * ntail);
+      ntail += 1;
+    };
+
+    let b : Nat64 = ((Nat64.fromNat(length) & 0xff) << 56) | tail;
+
+    v3 ^= b;
+
+    v0 +%= v1; v1 <<>= 13; v1 ^= v0; v0 <<>= 32;
+    v2 +%= v3; v3 <<>= 16; v3 ^= v2;
+    v0 +%= v3; v3 <<>= 21; v3 ^= v0;
+    v2 +%= v1; v1 <<>= 17; v1 ^= v2; v2 <<>= 32;
+
+    v0 ^= b;
+
+    v2 ^= 0xff;
+
+    // 3 Inlined compress rounds
+    v0 +%= v1; v1 <<>= 13; v1 ^= v0; v0 <<>= 32;
+    v2 +%= v3; v3 <<>= 16; v3 ^= v2;
+    v0 +%= v3; v3 <<>= 21; v3 ^= v0;
+    v2 +%= v1; v1 <<>= 17; v1 ^= v2; v2 <<>= 32;
+
+    v0 +%= v1; v1 <<>= 13; v1 ^= v0; v0 <<>= 32;
+    v2 +%= v3; v3 <<>= 16; v3 ^= v2;
+    v0 +%= v3; v3 <<>= 21; v3 ^= v0;
+    v2 +%= v1; v1 <<>= 17; v1 ^= v2; v2 <<>= 32;
+
+    v0 +%= v1; v1 <<>= 13; v1 ^= v0; v0 <<>= 32;
+    v2 +%= v3; v3 <<>= 16; v3 ^= v2;
+    v0 +%= v3; v3 <<>= 21; v3 ^= v0;
+    v2 +%= v1; v1 <<>= 17; v1 ^= v2; v2 <<>= 32;
+
+    v0 ^ v1 ^ v2 ^ v3
+  };
+
+  public func hashText(seed : (Nat64, Nat64), text : Text) : Nat64 {
+    hashBlob(seed, Text.encodeUtf8(text))
+  };
+
+  public func hashNat(seed : (Nat64, Nat64), nat : Nat) : Nat64 {
+    var v0 : Nat64 = 0x736f6d6570736575 ^ seed.0;
+    var v1 : Nat64 = 0x646f72616e646f6d ^ seed.1;
+    var v2 : Nat64 = 0x6c7967656e657261 ^ seed.0;
+    var v3 : Nat64 = 0x7465646279746573 ^ seed.1;
+
+    var length : Nat64 = 0;
+    var n : Nat = nat;
+
+
+    while (n != 0) {
+      length += 8;
+      let block = Nat64.fromIntWrap(n);
+
+      v3 ^= block;
+
+      v0 +%= v1; v1 <<>= 13; v1 ^= v0; v0 <<>= 32;
+      v2 +%= v3; v3 <<>= 16; v3 ^= v2;
+      v0 +%= v3; v3 <<>= 21; v3 ^= v0;
+      v2 +%= v1; v1 <<>= 17; v1 ^= v2; v2 <<>= 32;
+
+      v0 ^= block;
+
+      n := Nat.bitshiftRight(n, 64);
+    };
+
+    let b : Nat64 = (length & 0xff) << 56;
+
+    v3 ^= b;
+
+    v0 +%= v1; v1 <<>= 13; v1 ^= v0; v0 <<>= 32;
+    v2 +%= v3; v3 <<>= 16; v3 ^= v2;
+    v0 +%= v3; v3 <<>= 21; v3 ^= v0;
+    v2 +%= v1; v1 <<>= 17; v1 ^= v2; v2 <<>= 32;
+
+    v0 ^= b;
+
+    v2 ^= 0xff;
+
+    // 3 Inlined compress rounds
+    v0 +%= v1; v1 <<>= 13; v1 ^= v0; v0 <<>= 32;
+    v2 +%= v3; v3 <<>= 16; v3 ^= v2;
+    v0 +%= v3; v3 <<>= 21; v3 ^= v0;
+    v2 +%= v1; v1 <<>= 17; v1 ^= v2; v2 <<>= 32;
+
+    v0 +%= v1; v1 <<>= 13; v1 ^= v0; v0 <<>= 32;
+    v2 +%= v3; v3 <<>= 16; v3 ^= v2;
+    v0 +%= v3; v3 <<>= 21; v3 ^= v0;
+    v2 +%= v1; v1 <<>= 17; v1 ^= v2; v2 <<>= 32;
+
+    v0 +%= v1; v1 <<>= 13; v1 ^= v0; v0 <<>= 32;
+    v2 +%= v3; v3 <<>= 16; v3 ^= v2;
+    v0 +%= v3; v3 <<>= 21; v3 ^= v0;
+    v2 +%= v1; v1 <<>= 17; v1 ^= v2; v2 <<>= 32;
+
+    v0 ^ v1 ^ v2 ^ v3
+  };
+
+  public func hashInt(seed : (Nat64, Nat64), int : Int) : Nat64  {
+    // Maps all positive integers to 2, 4, 6, ... and all negative ones to 1, 3, 5, ...
+    var x : Nat = Int.abs(int) * 2;
+    if (int < 0) {
+      x -= 1;
+    };
+    hashNat(seed, x);
+  };
+
 }

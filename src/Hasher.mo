@@ -24,19 +24,23 @@ module {
   };
 
   public func nat(h : Hasher, nat : Nat) {
+    var count : Nat64 = 1;
     var n = nat;
-    h.writeNat8(Nat8.fromNat(n % 256));
-    n := Nat.bitshiftRight(n, 8);
+    h.writeNat64(Nat64.fromIntWrap(n));
+    n := Nat.bitshiftRight(n, 64);
 
     while (n != 0) {
-      h.writeNat8(Nat8.fromNat(n % 256));
-      n := Nat.bitshiftRight(n, 8);
+      count += 1;
+      h.writeNat64(Nat64.fromIntWrap(n));
+      n := Nat.bitshiftRight(n, 64);
     };
+    // Prefix-free
+    h.writeNat64(count);
   };
 
   public func int(h : Hasher, int : Int) {
     // Maps all positive integers to 2, 4, 6, ... and all negative ones to 1, 3, 5, ...
-    var x : Nat = Int.abs(int);
+    var x : Nat = Int.abs(int) * 2;
     if (int < 0) {
       x -= 1;
     };
@@ -49,7 +53,7 @@ module {
   public func int64(h : Hasher, x : Int64) = h.writeNat64(Int64.toNat64(x));
 
   public func text(h : Hasher, text : Text) {
-    h.writeBytes(Blob.toArray(Text.encodeUtf8(text)));
+    h.writeBlob(Text.encodeUtf8(text));
     // Prefix-free. Makes it so `("a", "b")` doesn't produce the same hash as `("ab", "")`
     h.writeNat8(0xFF);
   };
