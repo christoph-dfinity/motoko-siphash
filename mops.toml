@@ -1,9 +1,3 @@
-[dependencies]
-core = "0.5.0"
-
-[dev-dependencies]
-bench = "1.0.0"
-
 [package]
 name = "siphash"
 version = "1.0.0"
@@ -11,6 +5,12 @@ description = "SipHash implementation"
 repository = "https://github.com/christoph-dfinity/motoko-siphash"
 keywords = [ "hash" ]
 license = "Apache-2.0"
+
+[dependencies]
+core = "0.5.0"
+
+[dev-dependencies]
+bench = "1.0.0"
 
 [toolchain]
 moc = "0.14.14"
