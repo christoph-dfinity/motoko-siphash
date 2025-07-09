@@ -1,15 +1,15 @@
-import Blob "mo:base/Blob";
-import Nat "mo:base/Nat";
-import Nat8 "mo:base/Nat8";
-import Nat16 "mo:base/Nat16";
-import Nat32 "mo:base/Nat32";
-import Nat64 "mo:base/Nat64";
-import Int "mo:base/Int";
-import Int8 "mo:base/Int8";
-import Int16 "mo:base/Int16";
-import Int32 "mo:base/Int32";
-import Int64 "mo:base/Int64";
-import Text "mo:base/Text";
+import Blob "mo:core/Blob";
+import Int "mo:core/Int";
+import Int16 "mo:core/Int16";
+import Int32 "mo:core/Int32";
+import Int64 "mo:core/Int64";
+import Int8 "mo:core/Int8";
+import Nat "mo:core/Nat";
+import Nat16 "mo:core/Nat16";
+import Nat32 "mo:core/Nat32";
+import Nat64 "mo:core/Nat64";
+import Nat8 "mo:core/Nat8";
+import Text "mo:core/Text";
 
 module {
   public type Hasher = {

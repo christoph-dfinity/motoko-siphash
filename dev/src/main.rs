@@ -4,9 +4,9 @@ use std::fs;
 use siphasher::sip::SipHasher13;
 
 fn mk_u64_test_vector(mut w: impl Write, k1 : u64, k2 : u64, seed : u64, rounds : u32) {
-    writeln!(w, r#"import Nat "mo:base/Nat";
-import Nat64 "mo:base/Nat64";
-import Debug "mo:base/Debug";
+    writeln!(w, r#"import Nat "mo:core/Nat";
+import Nat64 "mo:core/Nat64";
+import Debug "mo:core/Debug";
 import Sip "../src/Sip13";
 
 module {{"#
@@ -45,9 +45,9 @@ module {{"#
 }
 
 fn mk_text_test_vector(mut w: impl Write, k1 : u64, k2 : u64, rounds : u32) {
-    writeln!(w, r#"import Nat "mo:base/Nat";
-import Nat64 "mo:base/Nat64";
-import Debug "mo:base/Debug";
+    writeln!(w, r#"import Nat "mo:core/Nat";
+import Nat64 "mo:core/Nat64";
+import Debug "mo:core/Debug";
 import Sip "../src/Sip13";
 
 module {{"#

@@ -1,12 +1,12 @@
-import Int "mo:base/Int";
-import Nat "mo:base/Nat";
-import Nat8 "mo:base/Nat8";
-import Nat16 "mo:base/Nat16";
-import Nat32 "mo:base/Nat32";
-import Nat64 "mo:base/Nat64";
-import Blob "mo:base/Blob";
-import Text "mo:base/Text";
+import Blob "mo:core/Blob";
 import Hasher "Hasher";
+import Int "mo:core/Int";
+import Nat "mo:core/Nat";
+import Nat64 "mo:core/Nat64";
+import Nat8 "mo:core/Nat8";
+import Text "mo:core/Text";
+
+import Prim "mo:prim"; // Remove me once https://github.com/dfinity/motoko-core/issues/302 is fixed
 
 module {
   // Might be a way to reduce allocations
@@ -79,13 +79,13 @@ module {
     };
 
     public func writeNat16(bytes : Nat16) {
-      let (msb, lsb) = Nat16.explode(bytes);
+      let (msb, lsb) = Prim.explodeNat16(bytes);
       writeNat8(lsb);
       writeNat8(msb);
     };
 
     public func writeNat32(bytes : Nat32) {
-      let (b4, b3, b2, b1) = Nat32.explode(bytes);
+      let (b4, b3, b2, b1) = Prim.explodeNat32(bytes);
       writeNat8(b1);
       writeNat8(b2);
       writeNat8(b3);
@@ -116,7 +116,7 @@ module {
         v2 := v2_;
         v3 := v3_;
       } else {
-        let (b8, b7, b6, b5, b4, b3, b2, b1) = Nat64.explode(bytes);
+        let (b8, b7, b6, b5, b4, b3, b2, b1) = Prim.explodeNat64(bytes);
         writeNat8(b1);
         writeNat8(b2);
         writeNat8(b3);

@@ -1,7 +1,7 @@
-import Array "mo:new-base/Array";
-import Blob "mo:new-base/Blob";
-import Text "mo:new-base/Text";
-import Random "mo:new-base/Random";
+import Array "mo:core/Array";
+import Blob "mo:core/Blob";
+import Text "mo:core/Text";
+import Random "mo:core/Random";
 import Prim "mo:prim";
 import Bench "mo:bench";
 import Sip13 "../src/Sip13";

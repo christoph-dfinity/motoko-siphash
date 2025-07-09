@@ -1,6 +1,6 @@
-import Nat "mo:base/Nat";
-import Nat64 "mo:base/Nat64";
-import Debug "mo:base/Debug";
+import Nat "mo:core/Nat";
+import Nat64 "mo:core/Nat64";
+import Debug "mo:core/Debug";
 import Sip "../src/Sip13";
 
 module {
