@@ -1,6 +1,6 @@
 [package]
 name = "siphash"
-version = "1.0.1"
+version = "1.0.2"
 description = "SipHash implementation"
 repository = "https://github.com/christoph-dfinity/motoko-siphash"
 keywords = [ "hash" ]
