@@ -5,7 +5,7 @@ let Package =
 let
   additions =
     [ { name = "core"
-      , version = "preview-0.5.0"
+      , version = "v1.0.0"
       , repo = "https://github.com/dfinity/motoko-core"
       , dependencies = [] : List Text
       }

@@ -1,4 +1,4 @@
 {
   dependencies = [ "core" ],
-  compiler = Some "0.14.14"
+  compiler = Some "0.16.0"
 }
